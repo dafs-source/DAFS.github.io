@@ -11,6 +11,6 @@
     <h1>Dark Age: Feather & Sword</h1>
     <p>Натисніть кнопку нижче, щоб перейти в Telegram</p>
     <!-- ЗАМІНІТЬ СЛОВО nickname НА ВАШЕ ПОСИЛАННЯ -->
-    <a href="https://t.mefeather_sword_bot" class="btn">Відкрити в Telegram</a>
+    <a href="https://t.me" class="btn">Відкрити в Telegram</a>
 </body>
 </html>
