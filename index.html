@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Age: Feather & Sword</title>
+    <!-- Підключаємо офіційний скрипт Telegram -->
+    <script src="https://telegram.org"></script>
+    <style>
+        body { 
+            background: #1a1a1a; 
+            color: white; 
+            text-align: center; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding-top: 50px; 
+            margin: 0;
+        }
+        h1 { color: #ffcc00; font-size: 28px; text-shadow: 2px 2px 4px #000; }
+        .welcome-box { background: #2a2a2a; border: 2px solid #3a3a3a; padding: 20px; border-radius: 15px; display: inline-block; margin-top: 20px; min-width: 280px; }
+        .username { color: #0088cc; font-weight: bold; }
+        .btn-close { display: inline-block; margin-top: 30px; padding: 12px 25px; background: #cc3333; color: white; text-decoration: none; border-radius: 25px; font-weight: bold; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h1>Dark Age: Feather & Sword</h1>
+    
+    <div class="welcome-box">
+        <p id="greeting">Завантаження всесвіту...</p>
+    </div>
+
+    <br>
+    <!-- Кнопка, яка закриє вікно гри всередині Telegram -->
+    <button class="btn-close" onclick="closeGame()">Вийти з гри</button>
+
+    <script>
+        // Ініціалізуємо Telegram Web App
+        const tg = window.Telegram.WebApp;
+        
+        // Повідомляємо Telegram, що додаток готовий до роботи
+        tg.ready();
+        
+        // Розширюємо додаток на весь екран телефону
+        tg.expand();
+
+        // Беремо дані користувача, який запустив гру
+        const user = tg.initDataUnsafe?.user;
+        const greetingElement = document.getElementById('greeting');
+
+        if (user) {
+            // Якщо відкрили в Telegram — вітаємо гравця по імені
+            const name = user.first_name || user.username || "Мандрівник";
+            greetingElement.innerHTML = `Вітаємо у Середньовіччі, <span class="username">${name}</span>!<br>Твій аватар готовий до виживання.`;
+        } else {
+            // Якщо відкрили просто в браузері комп'ютера
+            greetingElement.innerHTML = `Вітаємо, Мандрівнику!<br>Будь ласка, запустіть гру через Telegram-бота.`;
+        }
+
+        // Функція для закриття гри
+        function closeGame() {
+            tg.close();
+        }
+    </script>
+</body>
+</html>
