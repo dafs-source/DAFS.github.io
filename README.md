@@ -10,6 +10,6 @@
 <body>
     <h1>Dark Age: Feather & Sword</h1>
     <p>Натисніть кнопку нижче, щоб перейти в Telegram</p>
-    <a href="http://telegram.me/feather_sword_bot" class="btn">Запустити feather_sword_bot</a>
+    <a href="http://telegram.me/feather_sword_bot" class="btn">Запустити в телеграм</a>
 </body>
 </html>
