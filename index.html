@@ -2,63 +2,201 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dark Age: Feather & Sword</title>
     <!-- Підключаємо офіційний скрипт Telegram -->
     <script src="https://telegram.org"></script>
     <style>
-        body { 
-            background: #1a1a1a; 
-            color: white; 
-            text-align: center; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            padding-top: 50px; 
+        /* Базові налаштування в стилі скріншоту */
+        body {
+            background-color: #0d1117;
+            color: #f0f6fc;
+            font-family: 'Segoe UI', Roboto, sans-serif;
             margin: 0;
+            padding: 16px 16px 80px 16px; /* Відступ знизу для меню */
+            user-select: none;
         }
-        h1 { color: #ffcc00; font-size: 28px; text-shadow: 2px 2px 4px #000; }
-        .welcome-box { background: #2a2a2a; border: 2px solid #3a3a3a; padding: 20px; border-radius: 15px; display: inline-block; margin-top: 20px; min-width: 280px; }
-        .username { color: #0088cc; font-weight: bold; }
-        .btn-close { display: inline-block; margin-top: 30px; padding: 12px 25px; background: #cc3333; color: white; text-decoration: none; border-radius: 25px; font-weight: bold; border: none; cursor: pointer; }
+
+        /* Шапка з нікнеймом та балансом */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .user-info { font-weight: bold; font-size: 16px; color: #c9d1d9; }
+        .stats-top { display: flex; gap: 10px; }
+        .stat-badge {
+            background: #161b22;
+            border: 1px solid #30363d;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Заголовки розділів */
+        h2 { font-size: 18px; margin: 15px 0 10px 0; color: #ffcc00; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Картка героя */
+        .character-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            gap: 16px;
+            margin-bottom: 15px;
+        }
+        .avatar-placeholder {
+            width: 70px;
+            height: 70px;
+            background: #21262d;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            border: 1px solid #484f58;
+        }
+        .char-info { flex-grow: 1; }
+        .char-name { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
+        .char-class { font-size: 13px; color: #8b949e; margin-bottom: 8px; }
+        
+        /* Смужки життів та енергії */
+        .bar-container { margin-bottom: 6px; }
+        .bar-label { font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 2px; color: #c9d1d9; }
+        .bar-bg { background: #21262d; height: 6px; border-radius: 3px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 3px; width: 100%; }
+        .hp-fill { background: #da3633; }
+        .energy-fill { background: #e3b341; width: 50%; } /* Енергія на 50% */
+
+        /* Список доступних регіонів */
+        .region-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .region-card:active { background: #21262d; }
+        .region-name { font-weight: bold; font-size: 15px; }
+        .danger-badge {
+            background: rgba(86, 179, 11, 0.15);
+            color: #56b30b;
+            border: 1px solid rgba(86, 179, 11, 0.3);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        /* Фіксоване нижнє меню навігації */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #161b22;
+            border-top: 1px solid #30363d;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            backdrop-filter: blur(10px);
+        }
+        .nav-item {
+            color: #8b949e;
+            text-align: center;
+            font-size: 11px;
+            text-decoration: none;
+            cursor: pointer;
+            flex: 1;
+        }
+        .nav-item.active { color: #ffcc00; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
     </style>
 </head>
 <body>
 
-    <h1>Dark Age: Feather & Sword</h1>
-    
-    <div class="welcome-box">
-        <p id="greeting">Завантаження всесвіту...</p>
+    <!-- Шапка гри -->
+    <div class="header">
+        <div class="user-info" id="username">Завантаження...</div>
+        <div class="stats-top">
+            <div class="stat-badge">🪙 <span id="gold">246</span></div>
+            <div class="stat-badge">💎 <span id="gems">4</span></div>
+        </div>
     </div>
 
-    <br>
-    <!-- Кнопка, яка закриє вікно гри всередині Telegram -->
-    <button class="btn-close" onclick="closeGame()">Вийти з гри</button>
+    <h2>Твої герої</h2>
+    <!-- Картка вашого персонажа -->
+    <div class="character-card">
+        <div class="avatar-placeholder">🏹</div>
+        <div class="char-info">
+            <div class="char-name">Kael</div>
+            <div class="char-class">Лучник • Рів. 3</div>
+            
+            <!-- Здоров'я -->
+            <div class="bar-container">
+                <div class="bar-label"><span>❤️ Здоров'я</span><span>106/106</span></div>
+                <div class="bar-bg"><div class="bar-fill hp-fill"></div></div>
+            </div>
+            
+            <!-- Енергія -->
+            <div class="bar-container">
+                <div class="bar-label"><span>⚡ Енергія</span><span>54/119</span></div>
+                <div class="bar-bg"><div class="bar-fill energy-fill"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <h2>Доступні регіони</h2>
+    <!-- Список локацій -->
+    <div class="region-card" onclick="startExpedition('Ліс')">
+        <div class="region-name">🌲 Ліс</div>
+        <div class="danger-badge">Низька небезпека</div>
+    </div>
+    
+    <div class="region-card" onclick="startExpedition('Стара шахта')">
+        <div class="region-name">⛏️ Стара шахта</div>
+        <div class="danger-badge">Низька небезпека</div>
+    </div>
+    
+    <div class="region-card" onclick="startExpedition('Руїни')">
+        <div class="region-name">🏛️ Руїни</div>
+        <div class="danger-badge">Низька небезпека</div>
+    </div>
+
+    <!-- Нижня навігація -->
+    <div class="bottom-nav">
+        <div class="nav-item active"><span class="nav-icon">⛺</span>Табір</div>
+        <div class="nav-item" onclick="alert('Розділ в розробці')"><span class="nav-icon">🧭</span>Експедиції</div>
+        <div class="nav-item" onclick="alert('Розділ в розробці')"><span class="nav-icon">🎒</span>Інвентар</div>
+        <div class="nav-item" onclick="alert('Розділ в розробці')"><span class="nav-icon">🏰</span>Гільдія</div>
+    </div>
 
     <script>
-        // Ініціалізуємо Telegram Web App
+        // Ініціалізація Telegram Web App
         const tg = window.Telegram.WebApp;
-        
-        // Повідомляємо Telegram, що додаток готовий до роботи
         tg.ready();
-        
-        // Розширюємо додаток на весь екран телефону
         tg.expand();
 
-        // Беремо дані користувача, який запустив гру
+        // Відображаємо справжнє ім'я гравця з Telegram в шапці
         const user = tg.initDataUnsafe?.user;
-        const greetingElement = document.getElementById('greeting');
-
         if (user) {
-            // Якщо відкрили в Telegram — вітаємо гравця по імені
-            const name = user.first_name || user.username || "Мандрівник";
-            greetingElement.innerHTML = `Вітаємо у Середньовіччі, <span class="username">${name}</span>!<br>Твій аватар готовий до виживання.`;
+            document.getElementById('username').innerText = user.first_name || user.username;
         } else {
-            // Якщо відкрили просто в браузері комп'ютера
-            greetingElement.innerHTML = `Вітаємо, Мандрівнику!<br>Будь ласка, запустіть гру через Telegram-бота.`;
+            document.getElementById('username').innerText = "Гість";
         }
 
-        // Функція для закриття гри
-        function closeGame() {
-            tg.close();
+        // Логіка для вибору регіону
+        function startExpedition(regionName) {
+            tg.HapticFeedback.impactOccurred('medium'); // Легка вібрація при натисканні (фішка Telegram)
+            alert(`Ви відправили Каеля в експедицію: ${regionName}!`);
         }
     </script>
 </body>
