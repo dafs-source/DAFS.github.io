@@ -1,239 +1,622 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dark Age: Feather & Sword</title>
-    <script src="https://telegram.org"></script>
-    <style>
-        body {
-            background-color: #0d1117;
-            color: #f0f6fc;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 16px 16px 80px 16px;
-            user-select: none;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .user-info { font-weight: bold; font-size: 16px; color: #c9d1d9; }
-        .stats-top { display: flex; gap: 10px; }
-        .stat-badge {
-            background: #161b22;
-            border: 1px solid #30363d;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        h2 { font-size: 18px; margin: 15px 0 10px 0; color: #ffcc00; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        /* Картка героя */
-        .character-card {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            gap: 16px;
-            margin-bottom: 15px;
-        }
-        .avatar-placeholder {
-            width: 70px;
-            height: 70px;
-            background: #21262d;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            border: 1px solid #484f58;
-        }
-        .char-info { flex-grow: 1; }
-        .char-name { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
-        .char-class { font-size: 13px; color: #8b949e; margin-bottom: 8px; }
-        
-        /* Смужки HP та Енергії */
-        .bar-container { margin-bottom: 6px; }
-        .bar-label { font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 2px; color: #c9d1d9; }
-        .bar-bg { background: #21262d; height: 6px; border-radius: 3px; overflow: hidden; }
-        .bar-fill { height: 100%; border-radius: 3px; }
-        .hp-fill { background: #da3633; width: 100%; }
-        .energy-fill { background: #e3b341; width: 45%; }
-
-        /* Локації */
-        .region-card {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 12px;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-        .region-name { font-weight: bold; font-size: 15px; }
-        .danger-badge {
-            background: rgba(86, 179, 11, 0.15);
-            color: #56b30b;
-            border: 1px solid rgba(86, 179, 11, 0.3);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        
-        /* Експедиція (таймер) */
-        .expedition-status {
-            background: #1f1a10;
-            border: 1px solid #ffcc00;
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 15px;
-            display: none; /* Спочатку прихована */
-        }
-        .progress-bar-bg { background: #21262d; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
-        .progress-bar-fill { background: #ffcc00; height: 100%; width: 0%; transition: width 1s linear; }
-
-        /* Навігація */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: #161b22;
-            border-top: 1px solid #30363d;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-        }
-        .nav-item { color: #8b949e; text-align: center; font-size: 11px; cursor: pointer; flex: 1; }
-        .nav-item.active { color: #ffcc00; }
-        .nav-icon { display: block; font-size: 18px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Меч і Сталь</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#1a1208;color:#e8d8a8}
+body{display:flex;flex-direction:column;background:linear-gradient(180deg,#2a1810 0%,#1a1208 50%,#0a0805 100%)}
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden}
+.screen.on{display:flex}
+#topbar{background:linear-gradient(180deg,#3a2418,#2a1810);border-bottom:2px solid #5a3818;padding:8px;display:flex;justify-content:space-between;align-items:center;font-size:13px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+#topbar .res{display:flex;gap:12px;font-weight:600}
+#topbar .res span{display:flex;align-items:center;gap:3px}
+#topbar .gold{color:#ffd700}
+#topbar .gem{color:#66c0ff}
+#topbar .energy{color:#ff6f00}
+#mainmenu{flex:1;padding:12px;overflow-y:auto}
+.menu-title{text-align:center;font-size:24px;font-weight:bold;color:#ffd700;text-shadow:0 2px 4px rgba(0,0,0,.8),0 0 20px rgba(255,215,0,.3);margin-bottom:6px;letter-spacing:2px}
+.menu-sub{text-align:center;font-size:12px;color:#a08868;margin-bottom:16px;font-style:italic}
+.hero-summary{background:linear-gradient(135deg,#3a2418,#2a1810);border:1px solid #5a3818;border-radius:8px;padding:10px;margin-bottom:16px;text-align:center;font-size:12px}
+.hero-summary .lbl{color:#a08868}
+.hero-summary .val{color:#ffd700;font-weight:bold}
+.loc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.loc-card{background:linear-gradient(135deg,#3a2418,#2a1810);border:2px solid #5a3818;border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.loc-card:active{transform:scale(.97);border-color:#ffd700}
+.loc-card::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,215,0,.1),transparent);transition:left .5s}
+.loc-card:hover::before{left:100%}
+.loc-icon{font-size:38px;margin-bottom:6px;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+.loc-name{font-size:14px;font-weight:bold;color:#ffd700;margin-bottom:3px}
+.loc-desc{font-size:10px;color:#a08868}
+.loc-badge{position:absolute;top:6px;right:6px;background:#c62828;color:#fff;border-radius:8px;padding:1px 6px;font-size:9px;font-weight:bold}
+#tabbar{background:linear-gradient(180deg,#2a1810,#1a1208);border-top:2px solid #5a3818;display:flex;flex-shrink:0}
+.tab{flex:1;padding:8px 0;text-align:center;font-size:10px;color:#a08868;cursor:pointer;transition:all .2s;border-top:2px solid transparent}
+.tab.on{color:#ffd700;background:#0a0805;border-top-color:#ffd700}
+.tab .ic{font-size:18px;display:block;margin-bottom:2px}
+#party,#expedition,#craft,#quests,#inn,#arena,#backpack{padding:12px;overflow-y:auto;flex:1}
+.screen-title{font-size:18px;font-weight:bold;color:#ffd700;text-align:center;margin-bottom:12px;text-shadow:0 2px 4px rgba(0,0,0,.5);border-bottom:1px solid #5a3818;padding-bottom:8px}
+.hero-card{background:linear-gradient(135deg,#3a2418,#2a1810);border:1px solid #5a3818;border-radius:8px;padding:10px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.hero-icon{width:48px;height:48px;border-radius:50%;background:#1a1208;border:2px solid #ffd700;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.hero-info{flex:1;min-width:0}
+.hero-name{font-size:14px;font-weight:bold;color:#ffd700;margin-bottom:2px}
+.hero-class{font-size:11px;color:#a08868;margin-bottom:4px}
+.hero-stats{font-size:10px;color:#e8d8a8;display:flex;gap:8px;flex-wrap:wrap}
+.hero-stats span{background:#0a0805;padding:2px 6px;border-radius:4px}
+.hero-lvl{background:#5a3818;color:#ffd700;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:bold;flex-shrink:0}
+.zone-card{background:linear-gradient(135deg,#2a3a1a,#1a2810);border:2px solid #4a6a2a;border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;transition:all .2s}
+.zone-card:active{transform:scale(.98)}
+.zone-card.locked{opacity:.5;cursor:not-allowed;background:linear-gradient(135deg,#2a2a2a,#1a1a1a);border-color:#3a3a3a}
+.zone-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.zone-name{font-size:15px;font-weight:bold;color:#a8d870}
+.zone-dif{display:flex;gap:2px}
+.zone-dif .star{color:#5a3818}
+.zone-dif .star.on{color:#ffd700}
+.zone-desc{font-size:11px;color:#88a868;margin-bottom:8px}
+.dif-row{display:flex;gap:6px}
+.dif-btn{flex:1;padding:6px;background:#1a2810;border:1px solid #4a6a2a;border-radius:6px;font-size:11px;color:#a8d870;cursor:pointer;font-weight:bold}
+.dif-btn:active{background:#4a6a2a}
+.dif-btn .reward{font-size:9px;color:#88a868;display:block;margin-top:2px}
+#battlescreen{flex:1;display:none;flex-direction:column;background:linear-gradient(180deg,#3a2418,#1a1208);overflow:hidden}
+#battlescreen.on{display:flex}
+.battle-top{padding:8px;background:rgba(0,0,0,.3);border-bottom:1px solid #5a3818;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.battle-stage{flex:1;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#2a1810,#0a0805)}
+.enemy-slot,.hero-slot{position:absolute;display:flex;flex-direction:column;align-items:center;transition:all .3s}
+.enemy-slot{top:30%}
+.hero-slot{bottom:5%}
+.combatant{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;border:3px solid;position:relative}
+.enemy-slot .combatant{background:#3a1818;border-color:#c62828;box-shadow:0 4px 12px rgba(198,40,40,.4)}
+.hero-slot .combatant{background:#1a3a18;border-color:#43a047;box-shadow:0 4px 12px rgba(67,160,71,.4)}
+.combatant .hp{position:absolute;top:-10px;left:-4px;right:-4px;height:5px;background:#000;border-radius:3px;overflow:hidden;border:1px solid #5a3818}
+.combatant .hp-fill{height:100%;background:linear-gradient(90deg,#66bb6a,#43a047);transition:width .3s}
+.combatant .hp-fill.enemy{background:linear-gradient(90deg,#ef5350,#c62828)}
+.combatant.hit{animation:hit .3s}
+@keyframes hit{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px) rotate(-5deg)}75%{transform:translateX(8px) rotate(5deg)}}
+.combatant.attack{animation:atk .5s}
+@keyframes atk{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px) scale(1.2)}}
+.combatant .name{position:absolute;bottom:-18px;font-size:10px;color:#e8d8a8;background:rgba(0,0,0,.6);padding:1px 4px;border-radius:3px;white-space:nowrap}
+.battle-log{height:80px;background:rgba(0,0,0,.5);border-top:1px solid #5a3818;padding:6px 10px;overflow-y:auto;font-size:11px;color:#a08868;flex-shrink:0}
+.battle-log .entry{margin-bottom:2px}
+.battle-log .dmg{color:#ef5350;font-weight:bold}
+.battle-log .heal{color:#66bb6a;font-weight:bold}
+.battle-log .crit{color:#ffd700;font-weight:bold}
+.battle-skills{padding:8px;background:#0a0805;border-top:1px solid #5a3818;flex-shrink:0}
+.skill-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
+.skill{background:linear-gradient(135deg,#3a2418,#2a1810);border:2px solid #5a3818;border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;position:relative;font-size:11px;color:#e8d8a8;min-height:60px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.skill:active:not(.cd){transform:scale(.95);border-color:#ffd700}
+.skill.cd{opacity:.5;cursor:not-allowed}
+.skill .icon{font-size:22px;display:block;margin-bottom:2px}
+.skill .name{font-weight:bold;color:#ffd700}
+.skill .cd-time{position:absolute;top:2px;right:4px;background:#c62828;color:#fff;font-size:10px;padding:0 4px;border-radius:4px}
+.battle-controls{display:flex;gap:6px;padding:0 8px 8px}
+.bbtn{flex:1;padding:10px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:13px}
+.bbtn:active{transform:scale(.97)}
+.bbtn-auto{background:linear-gradient(135deg,#1976d2,#1565c0);color:#fff}
+.bbtn-flee{background:linear-gradient(135deg,#c62828,#b71c1c);color:#fff}
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.modal-bg.on{display:flex}
+.modal{background:linear-gradient(135deg,#3a2418,#2a1810);border:2px solid #ffd700;border-radius:12px;padding:18px;width:90%;max-width:360px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.7)}
+.modal h3{text-align:center;color:#ffd700;margin-bottom:12px;font-size:17px}
+.reward-card{background:linear-gradient(135deg,#4a6a2a,#3a5a1a);border:1px solid #6a8a3a;border-radius:8px;padding:10px;margin-bottom:6px;text-align:center}
+.reward-card .ic{font-size:32px;display:block;margin-bottom:4px}
+.reward-card .nm{color:#a8d870;font-weight:bold}
+.reward-card .qt{color:#ffd700;font-size:18px;font-weight:bold}
+.btn{padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;font-size:14px;margin-top:8px;background:linear-gradient(135deg,#5a3818,#3a2418);color:#ffd700;border:1px solid #ffd700}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,#1976d2,#1565c0);color:#fff;border-color:#42a5f5}
+.btn-success{background:linear-gradient(135deg,#2e7d32,#1b5e20);color:#fff;border-color:#66bb6a}
+.btn-danger{background:linear-gradient(135deg,#c62828,#b71c1c);color:#fff;border-color:#ef5350}
+</style>
 </head>
 <body>
+<div id="topbar">
+<div class="res">
+<span class="gold">🪙 <span id="gold">0</span></span>
+<span class="gem">💎 <span id="gems">5</span></span>
+<span class="energy">⚡ <span id="energy">50</span></span>
+</div>
+<div style="font-size:11px;color:#a08868">⚔ Lvl <span id="plvl">1</span></div>
+</div>
 
-    <!-- Шапка -->
-    <div class="header">
-        <div class="user-info" id="username">Kael (Гравець)</div>
-        <div class="stats-top">
-            <div class="stat-badge">🪙 <span>246</span></div>
-            <div class="stat-badge">💎 <span>4</span></div>
-        </div>
-    </div>
+<div class="screen on" id="mainmenu">
+<div class="menu-title">⚔ МЕЧ І СТАЛЬ ⚔</div>
+<div class="menu-sub">~ Табір Вільного Загону ~</div>
+<div class="hero-summary">
+<div><span class="lbl">Героїв:</span> <span class="val" id="partyCount">4</span> / 4 | <span class="lbl">Сер. рівень:</span> <span class="val" id="avgLvl">1</span></div>
+</div>
+<div class="loc-grid">
+<div class="loc-card" onclick="goTo('party')">
+<span class="loc-icon">👥</span>
+<div class="loc-name">Загін</div>
+<div class="loc-desc">Твої герої</div>
+</div>
+<div class="loc-card" onclick="goTo('expedition')">
+<span class="loc-icon">🗺</span>
+<div class="loc-name">Експедиції</div>
+<div class="loc-desc">Здобич і слава</div>
+</div>
+<div class="loc-card" onclick="goTo('craft')">
+<span class="loc-icon">⚒</span>
+<div class="loc-name">Кузня</div>
+<div class="loc-desc">Крафт зброї</div>
+</div>
+<div class="loc-card" onclick="goTo('quests')">
+<span class="loc-icon">📜</span>
+<div class="loc-name">Квести</div>
+<div class="loc-desc">Нагороди</div>
+</div>
+<div class="loc-card" onclick="goTo('inn')">
+<span class="loc-icon">🛖</span>
+<div class="loc-name">Хата</div>
+<div class="loc-desc">Відпочинок</div>
+</div>
+<div class="loc-card" onclick="goTo('backpack')">
+<span class="loc-icon">🎒</span>
+<div class="loc-name">Склад</div>
+<div class="loc-desc">Лут і речі</div>
+</div>
+</div>
+</div>
 
-    <!-- Вікно експедиції (як на скріншоті) -->
-    <div class="expedition-status" id="expBox">
-        <div style="display: flex; justify-content: space-between; font-size: 14px;">
-            <span id="expTitle" style="font-weight: bold;">Kael • Руїни</span>
-            <span id="expTimer" style="color: #ffcc00;">00:10</span>
-        </div>
-        <div style="font-size: 12px; color: #8b949e; margin-top: 4px;" id="expEvents">Подій: 0</div>
-        <div class="progress-bar-bg"><div class="progress-bar-fill" id="expProgress"></div></div>
-    </div>
+<div class="screen" id="party">
+<div class="screen-title">👥 Твій Загін</div>
+<div id="partyList"></div>
+</div>
 
-    <h2>Твої герої</h2>
-    <div class="character-card">
-        <div class="avatar-placeholder">🏹</div>
-        <div class="char-info">
-            <div class="char-name" id="charName">Kael</div>
-            <div class="char-class">Лучник • Рів. 3</div>
-            <div class="bar-container">
-                <div class="bar-label"><span>❤️ Здоров'я</span><span>106/106</span></div>
-                <div class="bar-bg"><div class="bar-fill hp-fill"></div></div>
-            </div>
-            <div class="bar-container">
-                <div class="bar-label"><span>⚡ Енергія</span><span>54/119</span></div>
-                <div class="bar-bg"><div class="bar-fill energy-fill"></div></div>
-            </div>
-        </div>
-    </div>
+<div class="screen" id="expedition">
+<div class="screen-title">🗺 Експедиції</div>
+<div style="font-size:11px;color:#a08868;text-align:center;margin-bottom:12px">Обери зону і складність. Перемога = лут і досвід.</div>
+<div id="zoneList"></div>
+</div>
 
-    <h2>Доступні регіони</h2>
-    <div class="region-card" onclick="startExpedition('Ліс', 10)">
-        <div class="region-name">🌲 Ліс</div>
-        <div class="danger-badge">Низька небезпека</div>
-    </div>
-    <div class="region-card" onclick="startExpedition('Стара шахта', 15)">
-        <div class="region-name">⛏️ Стара шахта</div>
-        <div class="danger-badge">Низька небезпека</div>
-    </div>
-    <div class="region-card" onclick="startExpedition('Руїни', 20)">
-        <div class="region-name">🏛️ Руїни</div>
-        <div class="danger-badge">Низька небезпека</div>
-    </div>
+<div class="screen" id="craft">
+<div class="screen-title">⚒ Кузня</div>
+<div style="text-align:center;color:#a08868;padding:20px">🔨 В розробці...</div>
+</div>
 
-    <div class="bottom-nav">
-        <div class="nav-item active"><span class="nav-icon">⛺</span>Табір</div>
-        <div class="nav-item" onclick="alert('Розділ в розробці')"><span class="nav-icon">🧭</span>Експедиції</div>
-        <div class="nav-item" onclick="alert('Розділ в розробці')"><span class="nav-icon">🎒</span>Інвентар</div>
-        <div class="nav-item" onclick="alert('Розділ в розробці')"><span class="nav-icon">🏰</span>Гільдія</div>
-    </div>
+<div class="screen" id="quests">
+<div class="screen-title">📜 Квестова Дошка</div>
+<div style="text-align:center;color:#a08868;padding:20px">📜 В розробці...</div>
+</div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        if (tg) {
-            tg.ready();
-            tg.expand();
-            const user = tg.initDataUnsafe?.user;
-            if (user) {
-                document.getElementById('username').innerText = user.first_name || user.username;
-                document.getElementById('charName').innerText = user.first_name || "Kael";
-            }
-        }
+<div class="screen" id="inn">
+<div class="screen-title">🛖 Хата Мандрівника</div>
+<div class="hero-summary">
+<div>💤 Відпочинок відновлює HP героїв</div>
+</div>
+<button class="btn btn-success" onclick="rest()" id="restBtn">💤 Відпочити (1 раз на день)</button>
+<div style="margin-top:16px;font-size:11px;color:#a08868;text-align:center">
+⚙ Налаштування гри будуть тут
+</div>
+</div>
 
-        let isInExpedition = false;
+<div class="screen" id="backpack">
+<div class="screen-title">🎒 Склад</div>
+<div style="text-align:center;color:#a08868;padding:20px">🎒 В розробці...</div>
+</div>
 
-        // Справжня механіка експедиції з таймером та смужкою прогресу!
-        function startExpedition(region, duration) {
-            if (isInExpedition) {
-                alert("Ваш герой вже в експедиції!");
-                return;
-            }
-            
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            
-            isInExpedition = true;
-            const expBox = document.getElementById('expBox');
-            const expTitle = document.getElementById('expTitle');
-            const expTimer = document.getElementById('expTimer');
-            const expProgress = document.getElementById('expProgress');
-            const expEvents = document.getElementById('expEvents');
-            
-            expBox.style.display = "block";
-            expTitle.innerText = `Kael • ${region}`;
-            
-            let timeLeft = duration;
-            let totalTime = duration;
-            let eventsCount = 0;
+<div class="screen" id="arena">
+<div class="screen-title">🏟 Арена (PvP)</div>
+<div style="text-align:center;color:#a08868;padding:20px">⚔ В розробці...</div>
+</div>
 
-            expProgress.style.width = "0%";
+<div id="battlescreen">
+<div class="battle-top">
+<div style="font-size:12px;color:#a08868">Хід: <span id="turnNum">1</span></div>
+<div style="font-size:13px"><span id="bsubtitle">Вовк x3</span></div>
+<button onclick="autoToggle()" id="autoBtn" style="background:#1976d2;color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer">▶ Авто</button>
+</div>
+<div class="battle-stage" id="stage"></div>
+<div class="battle-log" id="blog"></div>
+<div class="battle-skills" id="bskills"></div>
+<div class="battle-controls">
+<button class="bbtn bbtn-auto" onclick="autoToggle()" id="autoBtn2">⏩ Автобій</button>
+<button class="bbtn bbtn-flee" onclick="flee()">🏃 Втекти</button>
+</div>
+</div>
 
-            const interval = setInterval(() => {
-                timeLeft--;
-                eventsCount += Math.floor(Math.random() * 2); // Випадкові події по дорозі
-                
-                // Рахуємо відсоток прогресу
-                let progressPercent = ((totalTime - timeLeft) / totalTime) * 100;
-                expProgress.style.width = `${progressPercent}%`;
-                
-                // Оновлюємо таймер
-                expTimer.innerText = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
-                expEvents.innerText = `Подій: ${eventsCount}`;
+<div class="modal-bg" id="modal">
+<div class="modal" id="modalC"></div>
+</div>
 
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    isInExpedition = false;
-                    expBox.style.display = "none";
-                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-                    alert(`🎉 Експедиція в ${region} завершена! Ви знайшли +15 🪙 золота!`);
-                }
-            }, 1000);
-        }
-    </script>
+<div id="tabbar">
+<div class="tab on" onclick="goTo('mainmenu')"><div class="ic">🏕</div>Табір</div>
+<div class="tab" onclick="goTo('party')"><div class="ic">👥</div>Загін</div>
+<div class="tab" onclick="goTo('expedition')"><div class="ic">🗺</div>Похід</div>
+<div class="tab" onclick="goTo('craft')"><div class="ic">⚒</div>Кузня</div>
+<div class="tab" onclick="goTo('inn')"><div class="ic">🛖</div>Хата</div>
+</div>
+
+<script>
+const CLASSES={
+sword:{name:'Мечник',icon:'⚔️',base:{hp:100,atk:18,def:12,spd:8},color:'#c62828',skills:[
+{id:'slash',name:'Рубка',icon:'⚔️',dmg:1.2,cd:0,desc:'Потужний удар'},
+{id:'block',name:'Блок',icon:'🛡',def:0.5,cd:2,desc:'Захист +50% на 1 хід'},
+{id:'cleave',name:'Розсічення',icon:'💥',dmg:0.8,cd:3,desc:'Б'є всіх ворогів'}
+]},
+dagger:{name:'Убивця',icon:'🗡',base:{hp:70,atk:25,def:7,spd:15},color:'#6a1b9a',skills:[
+{id:'stab',name:'Укол',icon:'🗡',dmg:1.4,cd:0,desc:'Швидкий удар'},
+{id:'poison',name:'Отрута',icon:'☠',dot:5,cd:3,desc:'Отруює на 3 ходи'},
+{id:'evade',name:'Ухилення',icon:'💨',dodge:0.5,cd:4,desc:'50% ухилення на 1 хід'}
+]},
+bow:{name:'Лучник',icon:'🏹',base:{hp:80,atk:20,def:9,spd:12},color:'#2e7d32',skills:[
+{id:'shot',name:'Постріл',icon:'🏹',dmg:1.1,cd:0,desc:'Одиночна стріла'},
+{id:'volley',name:'Залп',icon:'🎯',dmg:0.6,cd:3,desc:'Б'є всіх'},
+{id:'aim',name:'Приціл',icon:'🎯',crit:0.5,cd:4,desc:'+50% крит на 2 ходи'}
+]},
+knight:{name:'Лицар',icon:'🛡',base:{hp:120,atk:15,def:18,spd:6},color:'#1565c0',skills:[
+{id:'slash',name:'Удар',icon:'⚔️',dmg:1.0,cd:0,desc:'Базовий удар'},
+{id:'heal',name:'Зцілення',icon:'💚',heal:30,cd:4,desc:'Лікує себе'},
+{id:'taunt',name:'Провокація',icon:'📢',taunt:0.5,cd:5,desc:'Вороги б'ють тебе'}
+]}
+};
+const ENEMIES=[
+{name:'Вовк',icon:'🐺',hp:40,atk:10,def:5,spd:10,g:10,xp:5,rarity:'common'},
+{name:'Гоблін',icon:'👺',hp:50,atk:12,def:6,spd:8,g:15,xp:8,rarity:'common'},
+{name:'Орк',icon:'👹',hp:100,atk:20,def:12,spd:6,g:40,xp:20,rarity:'rare'},
+{name:'Тролль',icon:'🧌',hp:180,atk:30,def:15,spd:4,g:80,xp:40,rarity:'rare'},
+{name:'Велетень',icon:'🦣',hp:300,atk:40,def:20,spd:3,g:200,xp:100,rarity:'epic'},
+{name:'Демон',icon:'👿',hp:500,atk:55,def:25,spd:8,g:500,xp:250,rarity:'epic'}
+];
+const ZONES=[
+{name:'Темний ліс',icon:'🌲',minLvl:1,maxLvl:5,desc:'Густі ліси, повні вовків і гоблінів',bg:'#1a2810',color:'#a8d870',enemies:['Вовк','Гоблін'],boss:{name:'Лісовий Древень',icon:'🌳',hp:200,atk:25,def:15}},
+{name:'Гірські перевали',icon:'⛰',minLvl:6,maxLvl:12,desc:'Скелі і орки',bg:'#3a2810',color:'#d8b870',enemies:['Орк','Тролль'],boss:{name:'Йотун',icon:'🗻',hp:500,atk:50,def:25},locked:true},
+{name:'Пустеля руїн',icon:'🏜',minLvl:13,maxLvl:20,desc:'Піски і велетні',bg:'#503820',color:'#d8a870',enemies:['Велетень'],boss:{},locked:true},
+{name:'Вулканічні землі',icon:'🌋',minLvl:21,maxLvl:30,desc:'Вогонь і демони',bg:'#3a1010',color:'#ff8060',enemies:['Демон'],boss:{},locked:true},
+{name:'Замок Темного Лорда',icon:'🏰',minLvl:31,maxLvl:50,desc:'Фінальний рейд',bg:'#2a0a2a',color:'#ff60ff',enemies:['Демон'],boss:{name:'Темний Лорд',icon:'👑',hp:2000,atk:100,def:50},locked:true}
+];
+const NAMES=['Альрик','Борис','Добриня','Тінь','Робін','Гарет','Седрік','Люк','Едвард','Роланд','Віллем','Олівер'];
+let G={
+gold:100,gems:5,energy:50,plvl:1,dayRested:false,
+heroes:[],
+inventory:[],
+currentZone:null,currentDif:1,
+battling:false,autoMode:false,turn:1
+};
+function init(){
+const saved=localStorage.getItem('medievalRPG');
+if(saved){try{Object.assign(G,JSON.parse(saved))}catch(e){}}
+if(G.heroes.length===0){
+G.heroes=[
+mkHero('sword','Альрик'),
+mkHero('dagger','Тінь'),
+mkHero('bow','Робін'),
+mkHero('knight','Гарет')
+];
+sv();
+}
+renderAll();
+}
+function mkHero(cls,n){
+const c=CLASSES[cls];
+return{name:n,cls,icon:c.icon,lvl:1,xp:0,hp:c.base.hp,hpMax:c.base.hp,atk:c.base.atk,def:c.base.def,spd:c.base.spd,skills:c.skills.map(s=>({...s,curCd:0})),buffs:{},eq:{weapon:null,armor:null}};
+}
+function sv(){localStorage.setItem('medievalRPG',JSON.stringify(G))}
+function renderAll(){
+updTop();
+renderParty();
+renderZones();
+}
+function updTop(){
+document.getElementById('gold').textContent=G.gold;
+document.getElementById('gems').textContent=G.gems;
+document.getElementById('energy').textContent=G.energy;
+document.getElementById('plvl').textContent=G.plvl;
+document.getElementById('partyCount').textContent=G.heroes.length;
+const avg=G.heroes.length?Math.round(G.heroes.reduce((a,h)=>a+h.lvl,0)/G.heroes.length):1;
+document.getElementById('avgLvl').textContent=avg;
+}
+function renderParty(){
+const c=document.getElementById('partyList');
+c.innerHTML='';
+for(const h of G.heroes){
+const card=document.createElement('div');
+card.className='hero-card';
+card.innerHTML=`<div class="hero-icon">${h.icon}</div>
+<div class="hero-info">
+<div class="hero-name">${h.name}</div>
+<div class="hero-class">${CLASSES[h.cls].name}</div>
+<div class="hero-stats">
+<span>❤️ ${h.hp}/${h.hpMax}</span>
+<span>⚔️ ${h.atk}</span>
+<span>🛡 ${h.def}</span>
+<span>💨 ${h.spd}</span>
+</div>
+</div>
+<div class="hero-lvl">Lvl ${h.lvl}</div>`;
+c.appendChild(card);
+}
+}
+function renderZones(){
+const c=document.getElementById('zoneList');
+c.innerHTML='';
+const avgLvl=G.heroes.length?Math.round(G.heroes.reduce((a,h)=>a+h.lvl,0)/G.heroes.length):1;
+for(let i=0;i<ZONES.length;i++){
+const z=ZONES[i];
+const unlocked=avgLvl>=z.minLvl;
+const zc=document.createElement('div');
+zc.className='zone-card'+(unlocked?'':' locked');
+zc.innerHTML=`<div class="zone-head">
+<div class="zone-name" style="color:${z.color}">${z.icon} ${z.name}</div>
+<div class="zone-dif">${Array(5).fill(0).map((_,j)=>`<span class="star${j<3?' on':''}">⭐</span>`).join('')}</div>
+</div>
+<div class="zone-desc">${unlocked?z.desc:`🔒 Потрібен рівень ${z.minLvl}`}</div>
+${unlocked?`<div class="dif-row">
+<button class="dif-btn" onclick="startExp(${i},1)">⭐ Звичайна<span class="reward">×1 лут</span></button>
+<button class="dif-btn" onclick="startExp(${i},2)">⭐⭐ Складна<span class="reward">×2 лут</span></button>
+<button class="dif-btn" onclick="startExp(${i},3)">⭐⭐⭐ Героїчна<span class="reward">×3 лут</span></button>
+</div>`:''}`;
+c.appendChild(zc);
+}
+}
+function goTo(id){
+document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+const target=id==='mainmenu'?'mainmenu':id;
+const el=document.getElementById(target);
+el.classList.add('on');
+const tabs=['mainmenu','party','expedition','craft','inn'];
+const idx=tabs.indexOf(id);
+document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+if(idx>=0)document.querySelectorAll('.tab')[idx].classList.add('on');
+renderAll();
+}
+function rest(){
+if(G.dayRested){alert('Ви вже відпочивали сьогодні!');return}
+for(const h of G.heroes)h.hp=h.hpMax;
+G.dayRested=true;
+sv();updTop();renderParty();
+alert('💤 Загін відпочив! HP відновлено.');
+}
+function startExp(zi,di){
+G.currentZone=zi;G.currentDif=di;G.battling=true;
+const z=ZONES[zi];
+const mult=di;
+const en=ENEMIES.find(e=>e.name===z.enemies[0])||ENEMIES[0];
+const enemies=[];
+const cnt=di+1;
+for(let i=0;i<cnt;i++)enemies.push({...en,hp:en.hp*mult*2,hpMax:en.hp*mult*2,atk:en.atk*mult,def:en.def});
+startBattle(enemies,z);
+}
+function startBattle(enemies,zone){
+document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+document.getElementById('battlescreen').classList.add('on');
+document.getElementById('tabbar').style.display='none';
+G.turn=1;G.autoMode=false;
+document.getElementById('turnNum').textContent=G.turn;
+document.getElementById('bsubtitle').textContent=enemies.map(e=>e.icon).join('')+' '+enemies[0].name+' x'+enemies.length;
+const stage=document.getElementById('stage');
+stage.innerHTML='';
+const ew=Math.min(80,400/enemies.length);
+enemies.forEach((e,i)=>{
+const el=document.createElement('div');
+el.className='enemy-slot';
+el.id='e'+i;
+el.style.left=(20+i*ew)+'%';
+el.innerHTML=`<div class="combatant" style="background:#3a1818;border-color:#c62828"><div class="hp"><div class="hp-fill enemy" style="width:100%"></div></div>${e.icon}<div class="name">${e.name}</div></div>`;
+stage.appendChild(el);
+});
+G.battle={enemies,zone,log:[],round:1,phase:'player'};
+G.heroes.forEach((h,i)=>{
+h.hp=Math.min(h.hpMax,h.hp);
+h.skills.forEach(s=>s.curCd=0);
+h.buffs={};
+const el=document.createElement('div');
+el.className='hero-slot';
+el.id='h'+i;
+el.style.left=(20+i*20)+'%';
+el.innerHTML=`<div class="combatant" style="background:#1a3a18;border-color:#43a047"><div class="hp"><div class="hp-fill" id="hhp${i}" style="width:100%"></div></div>${h.icon}<div class="name">${h.name}</div></div>`;
+stage.appendChild(el);
+});
+updSkills();
+document.getElementById('blog').innerHTML='<div class="entry">⚔ Битва почалась! Обери здібність.</div>';
+}
+function updSkills(){
+const s=document.getElementById('bskills');
+s.innerHTML='';
+let html='<div class="skill-row">';
+for(let i=0;i<3;i++){
+const h=G.heroes[i];
+if(!h)continue;
+const sk=h.skills[0];
+const cd=sk.curCd>0;
+html+=`<div class="skill${cd?' cd':''}" onclick="useSkill(${i},0)">
+${cd?`<div class="cd-time">${sk.curCd}</div>`:''}
+<div class="icon">${sk.icon}</div>
+<div class="name">${sk.name}</div>
+</div>`;
+}
+html+='</div><div class="skill-row">';
+for(let i=0;i<3;i++){
+const h=G.heroes[i];
+if(!h)continue;
+const sk=h.skills[1];
+const cd=sk.curCd>0;
+html+=`<div class="skill${cd?' cd':''}" onclick="useSkill(${i},1)">
+${cd?`<div class="cd-time">${sk.curCd}</div>`:''}
+<div class="icon">${sk.icon}</div>
+<div class="name">${sk.name}</div>
+</div>`;
+}
+html+='</div><div class="skill-row">';
+for(let i=0;i<3;i++){
+const h=G.heroes[i];
+if(!h)continue;
+const sk=h.skills[2];
+const cd=sk.curCd>0;
+html+=`<div class="skill${cd?' cd':''}" onclick="useSkill(${i},2)">
+${cd?`<div class="cd-time">${sk.curCd}</div>`:''}
+<div class="icon">${sk.icon}</div>
+<div class="name">${sk.name}</div>
+</div>`;
+}
+html+='</div>';
+s.innerHTML=html;
+}
+function useSkill(hi,si){
+if(!G.battling||G.battle.phase!=='player')return;
+const h=G.heroes[hi];
+const sk=h.skills[si];
+if(sk.curCd>0)return;
+const target=aiPickTarget(h);
+sk.curCd=sk.cd+1;
+if(sk.dmg){const tgt=target;const dmg=Math.max(1,Math.floor(h.atk*sk.dmg*(sk.crit&&h.buffs.crit?1+sk.crit:1)-tgt.def/2));tgt.hp-=dmg;log(`${h.icon} ${h.name} → ${tgt.icon}: <span class="dmg">-${dmg} HP</span>`,sk.crit&&h.buffs.crit);hitAnim(tgt)}
+if(sk.heal){h.hp=Math.min(h.hpMax,h.hp+sk.heal);log(`${h.icon} ${h.name} лікується: <span class="heal">+${sk.heal} HP</span>`)}
+if(sk.def){h.buffs.def=0.5;h.buffs.defTurn=1;log(`${h.icon} ${h.name} блокує`)}
+if(sk.dot){target.dot=sk.dot;target.dotTurn=3;log(`${h.icon} ${h.name} отруює ${target.icon}`)}
+if(sk.dodge){h.buffs.dodge=sk.dodge;h.buffs.dodgeTurn=1;log(`${h.icon} ${h.name} ухиляється`)}
+if(sk.crit){h.buffs.crit=sk.crit;h.buffs.critTurn=2;log(`${h.icon} ${h.name} прицілюється`)}
+if(sk.taunt){log(`${h.icon} ${h.name} провокує!`)}
+updHeroHp(hi);
+updSkills();
+if(checkEnd())return;
+G.battle.phase='enemy';
+setTimeout(()=>enemyTurn(),500);
+}
+function aiPickTarget(attacker){
+let best=null,bestThreat=0;
+for(const e of G.battle.enemies)if(e.hp>0){const t=e.atk;if(t>bestThreat){bestThreat=t;best=e}}
+return best||G.battle.enemies[0];
+}
+function enemyTurn(){
+const b=G.battle;
+for(const e of b.enemies){
+if(e.hp<=0)continue;
+if(e.dotTurn>0){e.hp-=e.dot;e.dotTurn--;log(`${e.icon} ${e.name} страждає від отрути: <span class="dmg">-${e.dot} HP</span>`)}
+if(e.hp<=0)continue;
+const target=aiPickEnemyTarget();
+if(target.buffs.dodge&&Math.random()<target.buffs.dodge){log(`${e.icon} ${e.name} атакує ${target.icon}, але ${target.name} ухиляється!`);continue}
+const dmg=Math.max(1,Math.floor(e.atk-target.def/2*(target.buffs.def?1-target.buffs.def:1)));
+target.hp-=dmg;
+log(`${e.icon} ${e.name} → ${target.icon}: <span class="dmg">-${dmg} HP</span>`);
+hitAnim(target);
+}
+G.turn++;
+document.getElementById('turnNum').textContent=G.turn;
+for(const h of G.heroes){
+h.skills.forEach(s=>{if(s.curCd>0)s.curCd--});
+if(h.buffs.defTurn!==undefined){h.buffs.defTurn--;if(h.buffs.defTurn<=0)delete h.buffs.def}
+if(h.buffs.dodgeTurn!==undefined){h.buffs.dodgeTurn--;if(h.buffs.dodgeTurn<=0)delete h.buffs.dodge}
+if(h.buffs.critTurn!==undefined){h.buffs.critTurn--;if(h.buffs.critTurn<=0)delete h.buffs.crit}
+}
+if(checkEnd())return;
+G.battle.phase='player';
+updSkills();
+updAllHp();
+if(G.autoMode)setTimeout(autoAct,800);
+}
+function aiPickEnemyTarget(){
+const alive=G.heroes.filter(h=>h.hp>0);
+if(alive.length===0)return G.heroes[0];
+return alive[Math.floor(Math.random()*alive.length)];
+}
+function autoAct(){
+if(G.battle.phase!=='player'||!G.battling)return;
+for(let i=0;i<G.heroes.length;i++){
+const h=G.heroes[i];
+if(h.hp<=0)continue;
+const ready=h.skills.findIndex(s=>s.curCd===0);
+if(ready>=0){useSkill(i,ready);return}
+}
+}
+function autoToggle(){
+G.autoMode=!G.autoMode;
+document.getElementById('autoBtn').textContent=G.autoMode?'⏸ Пауза':'▶ Авто';
+document.getElementById('autoBtn2').textContent=G.autoMode?'⏸ Пауза':'⏩ Автобій';
+if(G.autoMode&&G.battle&&G.battle.phase==='player')autoAct();
+}
+function flee(){
+if(!confirm('Втекти з бою? Прогрес не збережеться.'))return;
+endBattle(false);
+}
+function hitAnim(target){
+const el=target.el||(target.icon?document.getElementById('e'+G.battle.enemies.indexOf(target)):null);
+if(!el)return;
+const c=el.querySelector('.combatant');
+c.classList.add('hit');
+setTimeout(()=>c.classList.remove('hit'),300);
+}
+function updHeroHp(i){
+const h=G.heroes[i];
+const bar=document.getElementById('hhp'+i);
+if(bar)bar.style.width=Math.max(0,h.hp/h.hpMax*100)+'%';
+}
+function updAllHp(){
+G.heroes.forEach((h,i)=>updHeroHp(i));
+G.battle.enemies.forEach((e,i)=>{
+const el=document.getElementById('e'+i);
+if(el){const bar=el.querySelector('.hp-fill');if(bar)bar.style.width=Math.max(0,e.hp/e.hpMax*100)+'%'}
+});
+}
+function log(msg,crit){
+const l=document.getElementById('blog');
+const d=document.createElement('div');
+d.className='entry';
+d.innerHTML=msg;
+if(crit)d.classList.add('crit');
+l.appendChild(d);
+l.scrollTop=l.scrollHeight;
+}
+function checkEnd(){
+const b=G.battle;
+if(b.enemies.every(e=>e.hp<=0)){setTimeout(()=>endBattle(true),800);return true}
+if(G.heroes.every(h=>h.hp<=0)){setTimeout(()=>endBattle(false),800);return true}
+updAllHp();
+return false;
+}
+function endBattle(won){
+G.battling=false;
+const b=G.battle;
+const mult=G.currentDif;
+if(won){
+const gold=b.enemies.length*15*mult;
+const xp=b.enemies.length*10*mult;
+G.gold+=gold;
+for(const h of G.heroes)if(h.hp>0){h.xp+=xp;lvlUp(h)}
+sv();
+showReward(gold,xp,b);
+}else{
+G.energy-=5;
+sv();
+showLose();
+}
+document.getElementById('tabbar').style.display='flex';
+}
+function lvlUp(h){
+const need=h.lvl*50;
+if(h.xp>=need){
+h.lvl++;
+h.xp-=need;
+const c=CLASSES[h.cls];
+h.hpMax+=10;h.hp=h.hpMax;h.atk+=2;h.def+=1;h.spd+=1;
+}
+}
+function showReward(gold,xp,b){
+const m=document.getElementById('modal');
+const c=document.getElementById('modalC');
+let html=`<h3>🎉 Перемога!</h3>
+<div class="reward-card"><div class="ic">🪙</div><div class="nm">Золото</div><div class="qt">+${gold}</div></div>
+<div class="reward-card"><div class="ic">⭐</div><div class="nm">Досвід</div><div class="qt">+${xp}</div></div>`;
+if(Math.random()<0.3)html+=`<div class="reward-card"><div class="ic">🗡</div><div class="nm">Зброя</div><div class="qt">Знайдено!</div></div>`;
+html+=`<button class="btn btn-primary" onclick="closeM()">Чудово!</button>`;
+c.innerHTML=html;
+m.classList.add('on');
+}
+function showLose(){
+const m=document.getElementById('modal');
+const c=document.getElementById('modalC');
+c.innerHTML=`<h3>💀 Поразка</h3>
+<p style="text-align:center;color:#a08868;margin:12px 0">Ваш загін зазнав поразки. Тренуйтесь більше!</p>
+<button class="btn btn-danger" onclick="closeM()">Зрозуміло</button>`;
+m.classList.add('on');
+}
+function closeM(){
+document.getElementById('modal').classList.remove('on');
+goTo('expedition');
+for(const h of G.heroes)h.hp=Math.max(1,h.hp);
+sv();
+}
+init();
+</script>
 </body>
 </html>
