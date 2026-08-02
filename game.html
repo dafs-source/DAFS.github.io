@@ -4,20 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dark Age: Feather & Sword</title>
-    <!-- Підключаємо офіційний скрипт Telegram -->
     <script src="https://telegram.org"></script>
     <style>
-        /* Базові налаштування в стилі скріншоту */
         body {
             background-color: #0d1117;
             color: #f0f6fc;
             font-family: 'Segoe UI', Roboto, sans-serif;
             margin: 0;
-            padding: 16px 16px 80px 16px; /* Відступ знизу для меню */
+            padding: 16px 16px 80px 16px;
             user-select: none;
         }
-
-        /* Шапка з нікнеймом та балансом */
         .header {
             display: flex;
             justify-content: space-between;
@@ -34,10 +30,8 @@
             font-size: 14px;
             font-weight: bold;
         }
-
-        /* Заголовки розділів */
         h2 { font-size: 18px; margin: 15px 0 10px 0; color: #ffcc00; text-transform: uppercase; letter-spacing: 0.5px; }
-
+        
         /* Картка героя */
         .character-card {
             background: #161b22;
@@ -63,15 +57,15 @@
         .char-name { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
         .char-class { font-size: 13px; color: #8b949e; margin-bottom: 8px; }
         
-        /* Смужки життів та енергії */
+        /* Смужки HP та Енергії */
         .bar-container { margin-bottom: 6px; }
         .bar-label { font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 2px; color: #c9d1d9; }
         .bar-bg { background: #21262d; height: 6px; border-radius: 3px; overflow: hidden; }
-        .bar-fill { height: 100%; border-radius: 3px; width: 100%; }
-        .hp-fill { background: #da3633; }
-        .energy-fill { background: #e3b341; width: 50%; } /* Енергія на 50% */
+        .bar-fill { height: 100%; border-radius: 3px; }
+        .hp-fill { background: #da3633; width: 100%; }
+        .energy-fill { background: #e3b341; width: 45%; }
 
-        /* Список доступних регіонів */
+        /* Локації */
         .region-card {
             background: #161b22;
             border: 1px solid #30363d;
@@ -82,9 +76,7 @@
             align-items: center;
             margin-bottom: 10px;
             cursor: pointer;
-            transition: background 0.2s;
         }
-        .region-card:active { background: #21262d; }
         .region-name { font-weight: bold; font-size: 15px; }
         .danger-badge {
             background: rgba(86, 179, 11, 0.15);
@@ -95,58 +87,65 @@
             font-size: 11px;
             font-weight: bold;
         }
+        
+        /* Експедиція (таймер) */
+        .expedition-status {
+            background: #1f1a10;
+            border: 1px solid #ffcc00;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            display: none; /* Спочатку прихована */
+        }
+        .progress-bar-bg { background: #21262d; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+        .progress-bar-fill { background: #ffcc00; height: 100%; width: 0%; transition: width 1s linear; }
 
-        /* Фіксоване нижнє меню навігації */
+        /* Навігація */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            bottom: 0; left: 0; right: 0;
             background: #161b22;
             border-top: 1px solid #30363d;
             display: flex;
             justify-content: space-around;
             padding: 10px 0;
-            backdrop-filter: blur(10px);
         }
-        .nav-item {
-            color: #8b949e;
-            text-align: center;
-            font-size: 11px;
-            text-decoration: none;
-            cursor: pointer;
-            flex: 1;
-        }
+        .nav-item { color: #8b949e; text-align: center; font-size: 11px; cursor: pointer; flex: 1; }
         .nav-item.active { color: #ffcc00; }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+        .nav-icon { display: block; font-size: 18px; }
     </style>
 </head>
 <body>
 
-    <!-- Шапка гри -->
+    <!-- Шапка -->
     <div class="header">
-        <div class="user-info" id="username">Завантаження...</div>
+        <div class="user-info" id="username">Kael (Гравець)</div>
         <div class="stats-top">
-            <div class="stat-badge">🪙 <span id="gold">246</span></div>
-            <div class="stat-badge">💎 <span id="gems">4</span></div>
+            <div class="stat-badge">🪙 <span>246</span></div>
+            <div class="stat-badge">💎 <span>4</span></div>
         </div>
     </div>
 
+    <!-- Вікно експедиції (як на скріншоті) -->
+    <div class="expedition-status" id="expBox">
+        <div style="display: flex; justify-content: space-between; font-size: 14px;">
+            <span id="expTitle" style="font-weight: bold;">Kael • Руїни</span>
+            <span id="expTimer" style="color: #ffcc00;">00:10</span>
+        </div>
+        <div style="font-size: 12px; color: #8b949e; margin-top: 4px;" id="expEvents">Подій: 0</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="expProgress"></div></div>
+    </div>
+
     <h2>Твої герої</h2>
-    <!-- Картка вашого персонажа -->
     <div class="character-card">
         <div class="avatar-placeholder">🏹</div>
         <div class="char-info">
-            <div class="char-name">Kael</div>
+            <div class="char-name" id="charName">Kael</div>
             <div class="char-class">Лучник • Рів. 3</div>
-            
-            <!-- Здоров'я -->
             <div class="bar-container">
                 <div class="bar-label"><span>❤️ Здоров'я</span><span>106/106</span></div>
                 <div class="bar-bg"><div class="bar-fill hp-fill"></div></div>
             </div>
-            
-            <!-- Енергія -->
             <div class="bar-container">
                 <div class="bar-label"><span>⚡ Енергія</span><span>54/119</span></div>
                 <div class="bar-bg"><div class="bar-fill energy-fill"></div></div>
@@ -155,23 +154,19 @@
     </div>
 
     <h2>Доступні регіони</h2>
-    <!-- Список локацій -->
-    <div class="region-card" onclick="startExpedition('Ліс')">
+    <div class="region-card" onclick="startExpedition('Ліс', 10)">
         <div class="region-name">🌲 Ліс</div>
         <div class="danger-badge">Низька небезпека</div>
     </div>
-    
-    <div class="region-card" onclick="startExpedition('Стара шахта')">
+    <div class="region-card" onclick="startExpedition('Стара шахта', 15)">
         <div class="region-name">⛏️ Стара шахта</div>
         <div class="danger-badge">Низька небезпека</div>
     </div>
-    
-    <div class="region-card" onclick="startExpedition('Руїни')">
+    <div class="region-card" onclick="startExpedition('Руїни', 20)">
         <div class="region-name">🏛️ Руїни</div>
         <div class="danger-badge">Низька небезпека</div>
     </div>
 
-    <!-- Нижня навігація -->
     <div class="bottom-nav">
         <div class="nav-item active"><span class="nav-icon">⛺</span>Табір</div>
         <div class="nav-item" onclick="alert('Розділ в розробці')"><span class="nav-icon">🧭</span>Експедиції</div>
@@ -180,23 +175,64 @@
     </div>
 
     <script>
-        // Ініціалізація Telegram Web App
         const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-
-        // Відображаємо справжнє ім'я гравця з Telegram в шапці
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById('username').innerText = user.first_name || user.username;
-        } else {
-            document.getElementById('username').innerText = "Гість";
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                document.getElementById('username').innerText = user.first_name || user.username;
+                document.getElementById('charName').innerText = user.first_name || "Kael";
+            }
         }
 
-        // Логіка для вибору регіону
-        function startExpedition(regionName) {
-            tg.HapticFeedback.impactOccurred('medium'); // Легка вібрація при натисканні (фішка Telegram)
-            alert(`Ви відправили Каеля в експедицію: ${regionName}!`);
+        let isInExpedition = false;
+
+        // Справжня механіка експедиції з таймером та смужкою прогресу!
+        function startExpedition(region, duration) {
+            if (isInExpedition) {
+                alert("Ваш герой вже в експедиції!");
+                return;
+            }
+            
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            
+            isInExpedition = true;
+            const expBox = document.getElementById('expBox');
+            const expTitle = document.getElementById('expTitle');
+            const expTimer = document.getElementById('expTimer');
+            const expProgress = document.getElementById('expProgress');
+            const expEvents = document.getElementById('expEvents');
+            
+            expBox.style.display = "block";
+            expTitle.innerText = `Kael • ${region}`;
+            
+            let timeLeft = duration;
+            let totalTime = duration;
+            let eventsCount = 0;
+
+            expProgress.style.width = "0%";
+
+            const interval = setInterval(() => {
+                timeLeft--;
+                eventsCount += Math.floor(Math.random() * 2); // Випадкові події по дорозі
+                
+                // Рахуємо відсоток прогресу
+                let progressPercent = ((totalTime - timeLeft) / totalTime) * 100;
+                expProgress.style.width = `${progressPercent}%`;
+                
+                // Оновлюємо таймер
+                expTimer.innerText = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
+                expEvents.innerText = `Подій: ${eventsCount}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    isInExpedition = false;
+                    expBox.style.display = "none";
+                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    alert(`🎉 Експедиція в ${region} завершена! Ви знайшли +15 🪙 золота!`);
+                }
+            }, 1000);
         }
     </script>
 </body>
